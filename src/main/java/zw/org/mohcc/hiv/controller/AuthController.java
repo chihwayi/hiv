@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import zw.org.mohcc.hiv.service.RoleService;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -49,33 +50,36 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
 
-        // Set authentication in the security context
+        // Set authentication in security context
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // Generate JWT token
         String token = jwtTokenProvider.generateToken(authentication);
+
+        // Add a log statement to check if the token is generated
+        System.out.println("Generated JWT Token: " + token);
 
         // Return the JWT token in the response body
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest registerRequest) {
         // Check if the username is already taken
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Username is already taken");
+            return ResponseEntity.badRequest().body(Map.of("message", "Username is already taken"));
         }
 
         // Check if the email is already registered
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Email is already registered");
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is already registered"));
         }
 
         // Handle roles from the request
         Set<String> strRoles = registerRequest.getRoles();
         Set<Role> roles = new HashSet<>();
 
-        if (strRoles == null) {
+        if (strRoles == null || strRoles.isEmpty()) {
             // Default role assignment
             Role userRole = roleService.getRoleByName(ERole.ROLE_USER);
             roles.add(userRole);
@@ -85,23 +89,23 @@ public class AuthController {
                     Role adminRole = roleService.getRoleByName(ERole.ROLE_ADMIN);
                     roles.add(adminRole);
                 } else {
-                    Role userRole = roleService.getRoleByName(ERole.ROLE_USER);
-                    roles.add(userRole);
+                    Role defaultRole = roleService.getRoleByName(ERole.ROLE_USER);
+                    roles.add(defaultRole);
                 }
             });
         }
 
-        // Create a new User object
+        // Create and save user
         User user = new User();
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setEmail(registerRequest.getEmail());
         user.setRoles(roles);
         user.setEnabled(true);
-
-        // Save the user
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully");
+        // Return a success response in JSON format
+        return ResponseEntity.ok(Map.of("message", "User registered successfully"));
     }
+
 }

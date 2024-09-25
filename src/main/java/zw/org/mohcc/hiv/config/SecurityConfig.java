@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)  // Disable CSRF protection
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/auth/**").permitAll()  // Allow unauthenticated access to auth endpoints
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Restrict admin routes
                         .anyRequest().authenticated()  // All other requests require authentication
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Use stateless session management (JWT)
