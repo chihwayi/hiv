@@ -6,9 +6,11 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
@@ -28,8 +30,14 @@ public class JwtTokenProvider {
         long jwtExpirationInMs = 3600000;  // 1 hour in milliseconds
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
+        // Get user roles
+        String roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(jwtSecret, SignatureAlgorithm.HS512)  // Use secure key with HS512 algorithm

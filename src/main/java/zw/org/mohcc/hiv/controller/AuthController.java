@@ -7,11 +7,11 @@ import zw.org.mohcc.hiv.dto.RegisterRequest;
 import zw.org.mohcc.hiv.enums.ERole;
 import zw.org.mohcc.hiv.model.Role;
 import zw.org.mohcc.hiv.model.User;
-import zw.org.mohcc.hiv.repository.RoleRepository;
 import zw.org.mohcc.hiv.repository.UserRepository;
 import zw.org.mohcc.hiv.service.JwtTokenProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +22,7 @@ import zw.org.mohcc.hiv.service.RoleService;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -56,11 +57,16 @@ public class AuthController {
         // Generate JWT token
         String token = jwtTokenProvider.generateToken(authentication);
 
+        // Extract roles from authentication
+        Set<String> roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+
         // Add a log statement to check if the token is generated
         System.out.println("Generated JWT Token: " + token);
 
-        // Return the JWT token in the response body
-        return ResponseEntity.ok(new JwtResponse(token));
+        // Return the JWT token and roles in the response body
+        return ResponseEntity.ok(new JwtResponse(token, roles));
     }
 
     @PostMapping("/register")

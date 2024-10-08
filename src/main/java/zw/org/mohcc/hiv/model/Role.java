@@ -1,5 +1,7 @@
 package zw.org.mohcc.hiv.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import zw.org.mohcc.hiv.enums.ERole;
@@ -21,6 +23,7 @@ public class Role {
     private ERole name;
 
     @ManyToMany(mappedBy = "roles")
+    @JsonBackReference
     private Set<User> users;
 
     @Override

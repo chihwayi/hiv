@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import zw.org.mohcc.hiv.model.Role;
 import zw.org.mohcc.hiv.enums.ERole;
+import zw.org.mohcc.hiv.model.User;
 import zw.org.mohcc.hiv.repository.RoleRepository;
+import zw.org.mohcc.hiv.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +18,12 @@ import java.util.stream.Collectors;
 public class RoleService {
 
     private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public RoleService(RoleRepository roleRepository) {
+    public RoleService(RoleRepository roleRepository, UserRepository userRepository) {
         this.roleRepository = roleRepository;
+        this.userRepository = userRepository;
     }
 
     public Role getRoleByName(ERole roleName) {
@@ -47,5 +51,28 @@ public class RoleService {
                     }
                 })
                 .collect(Collectors.toSet());
+    }
+
+    public List<Role> getAllRoles() {
+        return roleRepository.findAll();
+    }
+
+    public void updateUserRoles(Long userId, List<String> roleNames) {
+        // Find user by ID
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Fetch roles by their names
+            Set<Role> roles = roleRepository.findByNameIn(roleNames);
+
+            // Update user's roles
+            user.setRoles(roles);
+
+            // Save the updated user
+            userRepository.save(user);
+        } else {
+            throw new RuntimeException("User not found");
+        }
     }
 }
