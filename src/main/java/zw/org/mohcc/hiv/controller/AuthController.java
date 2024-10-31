@@ -28,14 +28,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
     private final RoleService roleService;
-
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
     public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider,
                           UserRepository userRepository, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
