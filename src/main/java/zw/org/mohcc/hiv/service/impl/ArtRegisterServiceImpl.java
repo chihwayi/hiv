@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
+import zw.org.mohcc.hiv.dto.ArtInitiationDemographics;
+import zw.org.mohcc.hiv.dto.ArtInitiationGroupedByAge;
 import zw.org.mohcc.hiv.model.ArtRegister;
 import zw.org.mohcc.hiv.dto.ArtRegisterGrouped;
 import zw.org.mohcc.hiv.repository.ArtRegisterRepository;
@@ -40,6 +42,23 @@ public class ArtRegisterServiceImpl implements ArtRegisterService {
                 ))
                 .collect(Collectors.toList());
         return new PageImpl<>(groupedData, pageable, results.getTotalElements());
+    }
+
+    @Override
+    public List<ArtInitiationDemographics> getArtInitiationDemographics() {
+        return artRegisterRepository.getArtInitiationDemographics();
+    }
+
+    @Override
+    public ArtInitiationGroupedByAge getGroupedByAge() {
+        List<ArtInitiationDemographics> records = artRegisterRepository.getArtInitiationDemographics();
+        ArtInitiationGroupedByAge groupedDTO = new ArtInitiationGroupedByAge();
+
+        for (ArtInitiationDemographics record : records) {
+            groupedDTO.addRecord(record);
+        }
+
+        return groupedDTO;
     }
 
 }
