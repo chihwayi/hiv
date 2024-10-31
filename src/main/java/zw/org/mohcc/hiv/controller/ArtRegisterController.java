@@ -7,9 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import zw.org.mohcc.hiv.dto.ArtInitiationDemographics;
+import zw.org.mohcc.hiv.dto.ArtInitiationFacilityDTO;
 import zw.org.mohcc.hiv.dto.ArtInitiationGroupedByAge;
 import zw.org.mohcc.hiv.model.ArtRegister;
 import zw.org.mohcc.hiv.dto.ArtRegisterGrouped;
+import zw.org.mohcc.hiv.service.ArtInitiationFacilityDTOService;
 import zw.org.mohcc.hiv.service.ArtRegisterService;
 
 import java.util.List;
@@ -19,10 +21,12 @@ import java.util.List;
 public class ArtRegisterController {
 
     private final ArtRegisterService artRegisterService;
+    private final ArtInitiationFacilityDTOService artInitiationFacilityDTOService;
 
     @Autowired
-    public ArtRegisterController(ArtRegisterService artRegisterService) {
+    public ArtRegisterController(ArtRegisterService artRegisterService, ArtInitiationFacilityDTOService artInitiationFacilityDTOService) {
         this.artRegisterService = artRegisterService;
+        this.artInitiationFacilityDTOService = artInitiationFacilityDTOService;
     }
 
     @GetMapping("/get-all")
@@ -55,6 +59,12 @@ public class ArtRegisterController {
     public ResponseEntity<ArtInitiationGroupedByAge> getArtInitiationGroupedByAge() {
         ArtInitiationGroupedByAge groupedData = artRegisterService.getGroupedByAge();
         return ResponseEntity.ok(groupedData);
+    }
+
+    @GetMapping("/facility-data")
+    public ResponseEntity<List<ArtInitiationFacilityDTO>> getArtInitiationFacilityData() {
+        List<ArtInitiationFacilityDTO> combinedData = artInitiationFacilityDTOService.getArtInitiationFacilityData();
+        return ResponseEntity.ok(combinedData);
     }
 
 }
